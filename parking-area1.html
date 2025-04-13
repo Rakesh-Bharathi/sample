@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parking Levels | Chennai Mall Parking</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6e48aa;
+            --secondary: #9d50bb;
+            --accent: #4776E6;
+            --available: #00e676;
+            --reserved: #ffab00;
+            --occupied: #ff5252;
+            --dark: #1a1a2e;
+            --light: #f8f9fa;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: var(--light);
+            font-family: 'Roboto', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .header {
+            padding: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            background: rgba(26, 26, 46, 0.7);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .back-button {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 0.7rem 1.5rem;
+            border-radius: 50px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: bold;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .back-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateX(-5px);
+        }
+        
+        .mall-title {
+            text-align: center;
+        }
+        
+        .mall-title h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8rem;
+            background: linear-gradient(to right, #4776E6, #8E54E9);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+        }
+        
+        .mall-title p {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+        
+        .status-summary {
+            display: flex;
+            justify-content: space-around;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin: 1rem 2rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .status-item {
+            text-align: center;
+            padding: 0 1rem;
+        }
+        
+        .status-count {
+            font-size: 2.5rem;
+            font-weight: bold;
+            font-family: 'Orbitron', sans-serif;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(to bottom, white, #cccccc);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .available-count { 
+            text-shadow: 0 0 10px rgba(0, 230, 118, 0.3);
+        }
+        
+        .reserved-count { 
+            text-shadow: 0 0 10px rgba(255, 171, 0, 0.3);
+        }
+        
+        .occupied-count { 
+            text-shadow: 0 0 10px rgba(255, 82, 82, 0.3);
+        }
+        
+        .total-count {
+            text-shadow: 0 0 10px rgba(110, 72, 170, 0.3);
+        }
+        
+        .status-label {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .levels-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            padding: 0 2rem 2rem;
+        }
+        
+        .level-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 1.5rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .level-card:hover {
+            border-color: rgba(142, 84, 233, 0.5);
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(142, 84, 233, 0.3);
+        }
+        
+        .level-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .level-name {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.3rem;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+        
+        .level-name::before {
+            content: '⬢';
+            color: var(--accent);
+            font-size: 1.1rem;
+        }
+        
+        .level-status {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+        
+        .status-available { background: var(--available); box-shadow: 0 0 10px var(--available); }
+        .status-moderate { background: var(--reserved); box-shadow: 0 0 10px var(--reserved); }
+        .status-full { background: var(--occupied); box-shadow: 0 0 10px var(--occupied); }
+        
+        .parking-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 1rem;
+        }
+        
+        .parking-spot {
+            height: 60px;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .spot-available {
+            background: rgba(0, 230, 118, 0.1);
+            border: 2px solid var(--available);
+            color: var(--available);
+        }
+        
+        .spot-reserved {
+            background: rgba(255, 171, 0, 0.1);
+            border: 2px solid var(--reserved);
+            color: var(--reserved);
+            animation: pulseReserved 2s infinite;
+        }
+        
+        .spot-occupied {
+            background: rgba(255, 82, 82, 0.1);
+            border: 2px solid var(--occupied);
+            color: var(--occupied);
+        }
+        
+        .spot-number {
+            font-size: 0.9rem;
+            z-index: 1;
+        }
+        
+        .spot-status {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            margin-top: 0.2rem;
+            z-index: 1;
+        }
+        
+        .spot-hover-effect {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, transparent 10%, rgba(255, 255, 255, 0.1) 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .parking-spot:hover .spot-hover-effect {
+            opacity: 1;
+        }
+        
+        .spot-available:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px var(--available);
+        }
+        
+        .spot-reserved:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px var(--reserved);
+        }
+        
+        .spot-occupied:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px var(--occupied);
+        }
+        
+        @keyframes pulseReserved {
+            0% { opacity: 0.8; }
+            50% { opacity: 1; }
+            100% { opacity: 0.8; }
+        }
+        
+        .floating-icons {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .floating-icon {
+            position: absolute;
+            opacity: 0.1;
+            animation: float 15s infinite linear;
+        }
+        
+        @keyframes float {
+            0% {
+                transform: translateY(0) rotate(0deg);
+            }
+            100% {
+                transform: translateY(-100vh) rotate(360deg);
+            }
+        }
+        
+        .last-updated {
+            text-align: center;
+            padding: 1rem;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .status-summary {
+                flex-direction: column;
+                gap: 1.5rem;
+                margin: 1rem;
+            }
+            
+            .parking-grid {
+                grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+            }
+            
+            .header {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: flex-start;
+            }
+            
+            .mall-title {
+                text-align: left;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="floating-icons">
+        <div class="floating-icon" style="top: 10%; left: 5%; font-size: 2rem;">🅿</div>
+        <div class="floating-icon" style="top: 30%; left: 80%; font-size: 1.5rem;">🚗</div>
+        <div class="floating-icon" style="top: 70%; left: 15%; font-size: 1.8rem;">🅿</div>
+        <div class="floating-icon" style="top: 20%; left: 50%; font-size: 1.2rem;">🚙</div>
+        <div class="floating-icon" style="top: 80%; left: 70%; font-size: 2rem;">🅿</div>
+    </div>
+    
+    <div class="header">
+        <button class="back-button" onclick="goBack()">
+            ← BACK TO MALLS
+        </button>
+        <div class="mall-title">
+            <h1 id="mall-name">Mall Parking</h1>
+            <p id="mall-location">Chennai, Tamil Nadu</p>
+        </div>
+        <div style="width: 120px;"></div> <!-- Spacer -->
+    </div>
+    
+    <div class="status-summary">
+        <div class="status-item">
+            <div class="status-count available-count" id="available-count">0</div>
+            <div class="status-label">Available</div>
+        </div>
+        <div class="status-item">
+            <div class="status-count reserved-count" id="reserved-count">0</div>
+            <div class="status-label">Reserved</div>
+        </div>
+        <div class="status-item">
+            <div class="status-count occupied-count" id="occupied-count">0</div>
+            <div class="status-label">Occupied</div>
+        </div>
+        <div class="status-item">
+            <div class="status-count total-count" id="total-count">0</div>
+            <div class="status-label">Total Spots</div>
+        </div>
+    </div>
+    
+    <div class="levels-container" id="levels-container">
+        <!-- Levels will be generated by JavaScript -->
+    </div>
+    
+    <div class="last-updated">
+        Last updated: <span id="update-time"></span> | <span id="live-status">🟢 LIVE</span>
+    </div>
+
+    <script>
+        // Mall data with multiple levels
+        const malls = {
+            'Phoenix MarketCity': {
+                location: 'Velachery Main Road, Chennai',
+                levels: [
+                    { name: 'Level P1', total: 100, available: 35, reserved: 15, occupied: 50 },
+                    { name: 'Level P2', total: 100, available: 42, reserved: 18, occupied: 40 },
+                    { name: 'Level P3', total: 100, available: 30, reserved: 10, occupied: 60 },
+                    { name: 'Level P4', total: 100, available: 35, reserved: 15, occupied: 50 }
+                ]
+            },
+            'Express Avenue': {
+                location: 'Whites Road, Royapettah',
+                levels: [
+                    { name: 'Level B1', total: 80, available: 25, reserved: 15, occupied: 40 },
+                    { name: 'Level B2', total: 80, available: 30, reserved: 10, occupied: 40 },
+                    { name: 'Level B3', total: 80, available: 15, reserved: 10, occupied: 55 },
+                    { name: 'Level R1', total: 60, available: 15, reserved: 10, occupied: 35 }
+                ]
+            },
+            'Forum Vijaya Mall': {
+                location: 'Vadapalani, Chennai',
+                levels: [
+                    { name: 'Level 1', total: 90, available: 32, reserved: 8, occupied: 50 },
+                    { name: 'Level 2', total: 90, available: 40, reserved: 10, occupied: 40 },
+                    { name: 'Level 3', total: 90, available: 25, reserved: 10, occupied: 55 },
+                    { name: 'Level 4', total: 80, available: 15, reserved: 10, occupied: 55 }
+                ]
+            },
+            'VR Chennai': {
+                location: 'GST Road, Pallavaram',
+                levels: [
+                    { name: 'Ground Floor', total: 70, available: 25, reserved: 5, occupied: 40 },
+                    { name: 'First Floor', total: 70, available: 20, reserved: 10, occupied: 40 },
+                    { name: 'Second Floor', total: 60, available: 15, reserved: 5, occupied: 40 },
+                    { name: 'Third Floor', total: 50, available: 15, reserved: 5, occupied: 30 }
+                ]
+            }
+        };
+        
+        // Generate random spots for a level
+        function generateSpotsForLevel(level) {
+            const spots = [];
+            for (let i = 1; i <= level.total; i++) {
+                let status;
+                if (i <= level.occupied) {
+                    status = 'occupied';
+                } else if (i <= level.occupied + level.reserved) {
+                    status = 'reserved';
+                } else {
+                    status = 'available';
+                }
+                spots.push({ number: i, status });
+            }
+            // Shuffle spots to make it look more realistic
+            return spots.sort(() => Math.random() - 0.5);
+        }
+        
+        // Go back to main page
+        function goBack() {
+            window.location.href = 'index1.html';
+        }
+        
+        // Update time
+        function updateTime() {
+            const now = new Date();
+            const options = { 
+                hour: '2-digit', 
+                minute: '2-digit', 
+                second: '2-digit',
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric'
+            };
+            document.getElementById('update-time').textContent = now.toLocaleString('en-IN', options);
+        }
+        
+        // Load mall data
+        function loadMallData() {
+            const mallName = localStorage.getItem('selectedMall');
+            if (!mallName || !malls[mallName]) {
+                alert('Mall data not found!');
+                goBack();
+                return;
+            }
+            
+            const mall = malls[mallName];
+            document.getElementById('mall-name').textContent = mallName;
+            document.getElementById('mall-location').textContent = mall.location;
+            
+            // Calculate totals
+            let totalAvailable = 0;
+            let totalReserved = 0;
+            let totalOccupied = 0;
+            let totalSpots = 0;
+            
+            mall.levels.forEach(level => {
+                totalAvailable += level.available;
+                totalReserved += level.reserved;
+                totalOccupied += level.occupied;
+                totalSpots += level.total;
+            });
+            
+            document.getElementById('available-count').textContent = totalAvailable;
+            document.getElementById('reserved-count').textContent = totalReserved;
+            document.getElementById('occupied-count').textContent = totalOccupied;
+            document.getElementById('total-count').textContent = totalSpots;
+            
+            // Generate level cards
+            const container = document.getElementById('levels-container');
+            container.innerHTML = '';
+            
+            mall.levels.forEach(level => {
+                const levelCard = document.createElement('div');
+                levelCard.className = 'level-card';
+                
+                // Determine level status
+                let statusClass, statusText;
+                const availablePercentage = (level.available / level.total) * 100;
+                
+                if (availablePercentage > 30) {
+                    statusClass = 'status-available';
+                    statusText = 'Good Availability';
+                } else if (availablePercentage > 10) {
+                    statusClass = 'status-moderate';
+                    statusText = 'Limited Spaces';
+                } else {
+                    statusClass = 'status-full';
+                    statusText = 'Almost Full';
+                }
+                
+                // Level header
+                const levelHeader = document.createElement('div');
+                levelHeader.className = 'level-header';
+                
+                const levelName = document.createElement('div');
+                levelName.className = 'level-name';
+                levelName.textContent = level.name;
+                
+                const levelStatus = document.createElement('div');
+                levelStatus.className = 'level-status';
+                
+                const statusDot = document.createElement('div');
+                statusDot.className = `status-dot ${statusClass}`;
+                
+                const statusTextSpan = document.createElement('span');
+                statusTextSpan.textContent = statusText;
+                
+                levelStatus.appendChild(statusDot);
+                levelStatus.appendChild(statusTextSpan);
+                
+                levelHeader.appendChild(levelName);
+                levelHeader.appendChild(levelStatus);
+                
+                // Parking grid
+                const parkingGrid = document.createElement('div');
+                parkingGrid.className = 'parking-grid';
+                
+                // Generate spots
+                const spots = generateSpotsForLevel(level);
+                spots.forEach(spot => {
+                    const spotElement = document.createElement('div');
+                    spotElement.className = `parking-spot spot-${spot.status}`;
+                    
+                    const spotNumber = document.createElement('div');
+                    spotNumber.className = 'spot-number';
+                    spotNumber.textContent = spot.number;
+                    
+                    const spotStatus = document.createElement('div');
+                    spotStatus.className = 'spot-status';
+                    spotStatus.textContent = spot.status.charAt(0).toUpperCase() + spot.status.slice(1);
+                    
+                    const hoverEffect = document.createElement('div');
+                    hoverEffect.className = 'spot-hover-effect';
+                    
+                    spotElement.appendChild(spotNumber);
+                    spotElement.appendChild(spotStatus);
+                    spotElement.appendChild(hoverEffect);
+                    parkingGrid.appendChild(spotElement);
+                });
+                
+                levelCard.appendChild(levelHeader);
+                levelCard.appendChild(parkingGrid);
+                container.appendChild(levelCard);
+            });
+        }
+        
+        // Initialize
+        updateTime();
+        setInterval(updateTime, 1000);
+        loadMallData();
+        
+        // Make live status pulse
+        setInterval(() => {
+            const liveStatus = document.getElementById('live-status');
+            liveStatus.style.opacity = liveStatus.style.opacity === '0.5' ? '1' : '0.5';
+        }, 1000);
+    </script>
+</body>
+</html>
